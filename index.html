@@ -1,31 +1,352 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-
+<html lang="pt-BR">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Laudo de Ultrassom</title>
-	<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US Report - Adams Systems</title>
+    <style>
+        :root {
+            --bg-color: #f4f4f4;
+            --text-color: #333;
+            --input-bg: #fff;
+            --input-border: #ddd;
+            --button-bg: #4CAF50;
+            --button-hover: #45a049;
+            --copy-button-bg: #008CBA;
+            --copy-button-hover: #007B9A;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: var(--input-bg);
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h1, h2 {
+            color: var(--text-color);
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        select, textarea, input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid var(--input-border);
+            border-radius: 4px;
+            box-sizing: border-box;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        textarea {
+            height: 100px;
+        }
+
+        button {
+            background-color: var(--button-bg);
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: var(--button-hover);
+        }
+
+        .copy-button {
+            background-color: var(--copy-button-bg);
+        }
+
+        .copy-button:hover {
+            background-color: var(--copy-button-hover);
+        }
+
+        #editCodeSection {
+            margin-top: 20px;
+            border-top: 1px solid var(--input-border);
+            padding-top: 20px;
+        }
+
+        #codeList {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--input-border);
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        #codeList div {
+            cursor: pointer;
+            padding: 5px;
+            border-bottom: 1px solid var(--input-border);
+        }
+
+        #codeList div:hover {
+            background-color: var(--input-border);
+        }
+
+        #searchCode {
+            margin-bottom: 10px;
+        }
+
+        .dark-mode {
+            --bg-color: #333;
+            --text-color: #f4f4f4;
+            --input-bg: #555;
+            --input-border: #777;
+            --button-bg: #4CAF50;
+            --button-hover: #45a049;
+            --copy-button-bg: #008CBA;
+            --copy-button-hover: #007B9A;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+
+            button {
+                width: 100%;
+                margin-top: 5px;
+            }
+        }
+    </style>
 </head>
-
 <body>
-	<h1>Laudo de Ultrassom</h1>
-	<form id="ultrasound-report-form">
-		<label for="orgao">Órgão:</label>
-		<select id="orgao" name="orgao">
-			<option value="">Selecione...</option>
-		</select>
-		<label for="codigo">Código:</label>
-		<select id="codigo" name="codigo">
-			<option value="">Selecione...</option>
-		</select>
-		<label for="comentarios">Comentários:</label>
-		<textarea id="comentarios" name="comentarios"></textarea>
-		<label for="impressao_diagnostica">Impressão Diagnóstica:</label>
-		<textarea id="impressao_diagnostica" name="impressao_diagnostica" readonly></textarea>
-		<input type="submit" value="Gerar Laudo">
-	</form>
-	<script src="script.js"></script>
-</body>
+    <div class="container">
+        <h1>Laudo de Ultrassom - Versão Melhorada</h1>
+        
+        <button id="darkModeToggle">Alternar Modo Escuro</button>
 
+        <label for="orgao">Órgão:</label>
+        <select id="orgao">
+            <option value="">Selecione...</option>
+        </select>
+
+        <label for="codigo">Código:</label>
+        <select id="codigo">
+            <option value="">Selecione...</option>
+        </select>
+
+        <label for="comentarios">Comentários:</label>
+        <textarea id="comentarios"></textarea>
+        <button class="copy-button" onclick="copyToClipboard('comentarios')">Copiar Comentários</button>
+
+        <label for="impressao_diagnostica">Impressão Diagnóstica:</label>
+        <textarea id="impressao_diagnostica"></textarea>
+        <button class="copy-button" onclick="copyToClipboard('impressao_diagnostica')">Copiar Impressão Diagnóstica</button>
+
+        <div id="editCodeSection">
+            <h2>Editar Códigos</h2>
+            <input type="text" id="searchCode" placeholder="Pesquisar códigos...">
+            <div id="codeList"></div>
+            <label for="editCodigo">Código:</label>
+            <input type="text" id="editCodigo">
+            <label for="editComentario">Comentário:</label>
+            <textarea id="editComentario"></textarea>
+            <label for="editImpressao">Impressão Diagnóstica:</label>
+            <textarea id="editImpressao"></textarea>
+            <button onclick="saveEditedCode()">Salvar Alterações</button>
+        </div>
+
+        <button onclick="exportData()">Exportar Dados</button>
+        <input type="file" id="importFile" style="display: none;" onchange="importData(event)">
+        <button onclick="document.getElementById('importFile').click()">Importar Dados</button>
+    </div>
+
+    <script>
+    let codesData = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const orgaoSelect = document.getElementById('orgao');
+        const codigoSelect = document.getElementById('codigo');
+        const comentarioTextarea = document.getElementById('comentarios');
+        const impressaoDiagnosticaTextarea = document.getElementById('impressao_diagnostica');
+        const codeList = document.getElementById('codeList');
+        const searchCodeInput = document.getElementById('searchCode');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+
+        loadFromLocalStorage();
+
+        if (!codesData.length) {
+            fetch('codes.json')
+                .then(response => response.json())
+                .then(data => {
+                    codesData = data;
+                    saveToLocalStorage();
+                    populateOrgaoSelect();
+                    updateCodeList();
+                })
+                .catch(error => console.error('Error loading the JSON data:', error));
+        }
+
+        orgaoSelect.addEventListener('change', updateCodigoSelect);
+        codigoSelect.addEventListener('change', updateTextareas);
+        searchCodeInput.addEventListener('input', updateCodeList);
+        darkModeToggle.addEventListener('click', toggleDarkMode);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveEditedCode();
+            }
+        });
+    });
+
+    function populateOrgaoSelect() {
+        const orgaoSelect = document.getElementById('orgao');
+        orgaoSelect.innerHTML = '<option value="">Selecione...</option>';
+        const orgaos = new Set(codesData.map(item => item.orgao));
+        orgaos.forEach(orgao => {
+            const option = document.createElement('option');
+            option.value = orgao;
+            option.textContent = orgao;
+            orgaoSelect.appendChild(option);
+        });
+    }
+
+    function updateCodigoSelect() {
+        const orgaoSelect = document.getElementById('orgao');
+        const codigoSelect = document.getElementById('codigo');
+        const selectedOrgao = orgaoSelect.value;
+        codigoSelect.innerHTML = '<option value="">Selecione...</option>';
+        codesData.filter(item => item.orgao === selectedOrgao).forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.codigo;
+            option.textContent = item.codigo;
+            codigoSelect.appendChild(option);
+        });
+    }
+
+    function updateTextareas() {
+        const codigoSelect = document.getElementById('codigo');
+        const comentarioTextarea = document.getElementById('comentarios');
+        const impressaoDiagnosticaTextarea = document.getElementById('impressao_diagnostica');
+        const selectedCodigo = codigoSelect.value;
+        const item = codesData.find(item => item.codigo === selectedCodigo);
+        comentarioTextarea.value = item ? item.comentario : '';
+        impressaoDiagnosticaTextarea.value = item ? item.impressao_diagnostica : '';
+    }
+
+    function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        element.select();
+        document.execCommand('copy');
+        alert('Texto copiado para a área de transferência!');
+    }
+
+    function updateCodeList() {
+        const codeList = document.getElementById('codeList');
+        const searchTerm = document.getElementById('searchCode').value.toLowerCase();
+        codeList.innerHTML = '';
+        codesData.filter(item => 
+            item.codigo.toLowerCase().includes(searchTerm) || 
+            item.orgao.toLowerCase().includes(searchTerm)
+        ).forEach(item => {
+            const div = document.createElement('div');
+            div.textContent = `${item.codigo} - ${item.orgao}`;
+            div.onclick = () => loadCodeForEditing(item.codigo);
+            codeList.appendChild(div);
+        });
+    }
+
+    function loadCodeForEditing(codigo) {
+        const item = codesData.find(item => item.codigo === codigo);
+        if (item) {
+            document.getElementById('editCodigo').value = item.codigo;
+            document.getElementById('editComentario').value = item.comentario;
+            document.getElementById('editImpressao').value = item.impressao_diagnostica;
+        }
+    }
+
+    function saveEditedCode() {
+        const codigo = document.getElementById('editCodigo').value;
+        const comentario = document.getElementById('editComentario').value;
+        const impressao = document.getElementById('editImpressao').value;
+
+        if (!codigo || !comentario || !impressao) {
+            alert('Por favor, preencha todos os campos.');
+            return;
+        }
+
+        const index = codesData.findIndex(item => item.codigo === codigo);
+        if (index !== -1) {
+            codesData[index].comentario = comentario;
+            codesData[index].impressao_diagnostica = impressao;
+            alert('Código atualizado com sucesso!');
+        } else {
+            alert('Código não encontrado.');
+        }
+        saveToLocalStorage();
+        updateCodeList();
+    }
+
+    function saveToLocalStorage() {
+        localStorage.setItem('ultrasoundCodes', JSON.stringify(codesData));
+    }
+
+    function loadFromLocalStorage() {
+        const savedData = localStorage.getItem('ultrasoundCodes');
+        if (savedData) {
+            codesData = JSON.parse(savedData);
+            updateCodeList();
+            populateOrgaoSelect();
+        }
+    }
+
+    function exportData() {
+        const dataStr = JSON.stringify(codesData);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        const exportFileDefaultName = 'ultrasound_codes_data.json';
+
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+    }
+
+    function importData(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                codesData = importedData;
+                saveToLocalStorage();
+                updateCodeList();
+                populateOrgaoSelect();
+                alert('Dados importados com sucesso!');
+            } catch (error) {
+                alert('Erro ao importar dados. Verifique se o arquivo está no formato correto.');
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+    }
+    </script>
+</body>
 </html>
